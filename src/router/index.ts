@@ -31,6 +31,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
+  // If user is already authenticated and navigates to home or login, redirect to portal
+  if ((to.name === 'accueil' || to.path === '/' || to.name === 'login' || to.path === '/login') && isAuthenticated()) {
+    next({ path: '/portal' })
+    return
+  }
+
   if (to.matched.some(r => r.meta?.requiresAuth) && !isAuthenticated()) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else {
