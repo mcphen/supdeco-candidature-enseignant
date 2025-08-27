@@ -10,6 +10,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/', name: 'accueil', component: CandidatureForm },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/forgot-password', name: 'forgot-password', component: () => import('../views/ForgotPasswordView.vue') },
+  { path: '/reset-password', name: 'reset-password', component: () => import('../views/ResetPasswordView.vue') },
   {
     path: '/portal',
     component: PortalView,
@@ -18,6 +19,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', redirect: '/portal/dashboard' },
       { path: 'dashboard', name: 'portal-dashboard', component: PortalDashboard },
       { path: 'profil', name: 'portal-profil', component: () => import('../views/PortalProfil.vue') },
+      { path: 'parametres', name: 'portal-parametres', component: () => import('../views/PortalParametres.vue') },
       { path: 'soumettre', name: 'portal-soumettre', component: PortalSoumettre },
     ],
   },

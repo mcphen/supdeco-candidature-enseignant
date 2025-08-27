@@ -31,6 +31,7 @@
       <nav class="menu" role="navigation" aria-label="Menu du portail">
         <RouterLink class="menu-link" :class="{active: isActive('/portal/dashboard')}" to="/portal/dashboard" @click="closeSidebar">Dashboard</RouterLink>
         <RouterLink class="menu-link" :class="{active: isActive('/portal/profil')}" to="/portal/profil" @click="closeSidebar">Mon profil</RouterLink>
+        <RouterLink class="menu-link" :class="{active: isActive('/portal/parametres')}" to="/portal/parametres" @click="closeSidebar">Paramètres</RouterLink>
         <RouterLink class="menu-link" :class="{active: isActive('/portal/soumettre')}" to="/portal/soumettre" @click="closeSidebar">Soumettre son dossier</RouterLink>
       </nav>
       <button class="logout" @click="logout">Se déconnecter</button>
@@ -88,6 +89,8 @@ function isActive(path: string) {
 
 const pageTitle = computed(() => {
   if (route.path.includes('/portal/soumettre')) return 'Soumettre son dossier'
+  if (route.path.includes('/portal/profil')) return 'Mon profil'
+  if (route.path.includes('/portal/parametres')) return 'Paramètres du compte'
   return 'Dashboard'
 })
 

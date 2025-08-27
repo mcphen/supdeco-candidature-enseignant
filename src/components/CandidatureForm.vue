@@ -89,6 +89,22 @@
       </div>
     </div>
 
+    <div class="section">
+      <h3 class="section-title">Confidentialité & communications</h3>
+      <div class="row">
+        <label class="required">Consentements</label>
+        <label class="checkbox">
+          <input type="checkbox" v-model="form.accepts_policies" :aria-invalid="tried && !form.accepts_policies" />
+          <span>J'ai lu et j'accepte la <a href="#" target="_blank" rel="noopener">Politique de confidentialité</a> et les <a href="#" target="_blank" rel="noopener">Conditions d'utilisation</a>.</span>
+        </label>
+        <small v-if="tried && !form.accepts_policies" class="hint" style="color:#b91c1c">Cette acceptation est obligatoire pour continuer.</small>
+        <label class="checkbox">
+          <input type="checkbox" v-model="form.newsletter_opt_in" />
+          <span>Je souhaite recevoir la newsletter et d'autres informations du groupe.</span>
+        </label>
+      </div>
+    </div>
+
     <div class="actions">
       <button type="submit" class="submit" :disabled="loading" @click="tried = true">
         {{ loading ? 'Envoi…' : 'S\'inscrire' }}
@@ -129,7 +145,9 @@ const form = reactive<Candidate>({
   genre: 'H',
   nationalite: '',
   domaines_expertise: [],
-  autres: ''
+  autres: '',
+  accepts_policies: false,
+  newsletter_opt_in: false,
 })
 
 const loading = ref(false)
@@ -145,6 +163,11 @@ async function onSubmit() {
   message.value = ''
   error.value = ''
   try {
+    if (!form.accepts_policies) {
+      error.value = 'Vous devez accepter la politique de confidentialité et les conditions d\'utilisation.'
+      loading.value = false
+      return
+    }
     const res = await submitCandidate(form)
     message.value = res.message || 'Votre inscription a été enregistrée. Vérifiez votre email.'
   } catch (e: any) {

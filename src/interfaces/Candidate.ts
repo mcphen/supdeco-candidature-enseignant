@@ -13,6 +13,8 @@ export interface Candidate {
   nationalite: string
   domaines_expertise: string[] // list of selected items
   autres?: string
+  accepts_policies: boolean
+  newsletter_opt_in?: boolean
 }
 
 export interface CandidateResponse {

@@ -1,20 +1,29 @@
 <template>
-  <section class="forgot">
+  <section class="reset">
     <div class="card">
       <header class="header">
-        <h2 class="title">Mot de passe oublié</h2>
-        <p class="subtitle">Entrez votre adresse email pour recevoir un lien de réinitialisation.</p>
+        <h2 class="title">Réinitialiser le mot de passe</h2>
+        <p class="subtitle">Définissez un nouveau mot de passe pour votre compte.</p>
       </header>
 
       <form @submit.prevent="onSubmit" class="form" novalidate>
         <div class="row">
           <label for="email" class="required">Email</label>
-          <input id="email" v-model="email" type="email" required autocomplete="email" :aria-invalid="!!error" placeholder="nom@exemple.com" />
+          <input id="email" v-model="email" type="email" required autocomplete="email" :readonly="true" />
+        </div>
+
+        <div class="row">
+          <label for="password" class="required">Nouveau mot de passe</label>
+          <input id="password" v-model="password" type="password" required autocomplete="new-password" placeholder="*******" />
+        </div>
+
+        <div class="row">
+          <label for="password_confirmation" class="required">Confirmer le mot de passe</label>
+          <input id="password_confirmation" v-model="passwordConfirmation" type="password" required autocomplete="new-password" placeholder="*******" />
         </div>
 
         <div class="actions">
-          <button type="submit" class="submit" :disabled="loading">{{ loading ? 'Envoi…' : 'Envoyer le lien' }}</button>
-          <p class="helper">Vous vous souvenez de votre mot de passe ? <RouterLink to="/login" class="link">Se connecter</RouterLink></p>
+          <button type="submit" class="submit" :disabled="loading">{{ loading ? 'Réinitialisation…' : 'Réinitialiser' }}</button>
           <p v-if="message" class="alert success">✅ {{ message }}</p>
           <p v-if="error" class="alert danger">⚠️ {{ error }}</p>
         </div>
@@ -24,14 +33,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import http from '../api/http'
 
+const route = useRoute()
+const router = useRouter()
+
 const email = ref('')
+const token = ref('')
+const password = ref('')
+const passwordConfirmation = ref('')
 const loading = ref(false)
 const message = ref('')
 const error = ref('')
+
+onMounted(() => {
+  email.value = String(route.query.email || '')
+  token.value = String(route.query.token || '')
+})
 
 async function onSubmit() {
   message.value = ''
@@ -39,15 +59,35 @@ async function onSubmit() {
   loading.value = true
   try {
     if (!/.+@.+\..+/.test(email.value)) {
-      throw new Error('Veuillez entrer une adresse email valide.')
+      throw new Error('Lien invalide: email manquant ou incorrect.')
     }
-    // Appel backend: envoi d'un nouveau mot de passe par email si le compte existe
-    const { data } = await http.post('/enseignants/forgot-password', { email: email.value })
-    message.value = data?.message || 'Si un compte existe pour cet email, un nouveau mot de passe a été envoyé.'
+    if (!token.value) {
+      throw new Error('Lien invalide: token manquant.')
+    }
+    if (password.value.length < 6) {
+      throw new Error('Le mot de passe doit contenir au moins 6 caractères.')
+    }
+    if (password.value !== passwordConfirmation.value) {
+      throw new Error('Les mots de passe ne correspondent pas.')
+    }
+
+    const { data } = await http.post('/enseignants/reset-password', {
+      email: email.value,
+      token: token.value,
+      password: password.value,
+      password_confirmation: passwordConfirmation.value,
+    })
+    message.value = data?.message || 'Mot de passe réinitialisé avec succès.'
+
+    // Redirection après un court délai
+    setTimeout(() => {
+      router.replace({ name: 'login' })
+    }, 800)
   } catch (e: any) {
-    // Gestion des erreurs API (validation, réseau, etc.)
-    if (e?.response?.data?.errors?.email) {
-      error.value = Array.isArray(e.response.data.errors.email) ? e.response.data.errors.email[0] : String(e.response.data.errors.email)
+    if (e?.response?.data?.errors) {
+      const errs = e.response.data.errors
+      const first = Object.values(errs)[0] as any
+      error.value = Array.isArray(first) ? first[0] : String(first)
     } else if (e?.response?.data?.message) {
       error.value = e.response.data.message
     } else if (e?.message) {
@@ -62,7 +102,7 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-.forgot { display: grid; place-items: center; padding: 2rem 1rem; min-height: calc(100vh - 64px); }
+.reset { display: grid; place-items: center; padding: 2rem 1rem; min-height: calc(100vh - 64px); }
 .card { width: min(520px, 100%); background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 10px 30px rgba(17,24,39,0.06); overflow: hidden; }
 .header { padding: 1.25rem 1.25rem 0; }
 .title { margin: 0; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem; }
@@ -75,14 +115,10 @@ label.required::after { content: ' *'; color: #ef4444; }
 input { padding: 0.65rem 0.8rem; border: 1px solid #d1d5db; border-radius: 10px; background: #fff; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 input::placeholder { color: #9ca3af; }
 input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(49, 63, 150, 0.16); }
-input[aria-invalid="true"] { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12); }
 .actions { display: grid; gap: 0.75rem; margin-top: 0.25rem; }
 .submit { padding: 0.8rem 1rem; border-radius: 10px; background: var(--color-primary); color: #fff; border: none; cursor: pointer; font-weight: 700; letter-spacing: 0.2px; box-shadow: 0 8px 20px rgba(49,63,150,0.22); }
 .submit:hover { background: #293584; }
 .submit[disabled] { opacity: 0.7; cursor: not-allowed; }
-.helper { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
-.link { color: var(--color-primary); font-weight: 600; text-decoration: none; }
-.link:hover { text-decoration: underline; }
 .alert { margin: 0; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid; }
 .alert.success { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
 .alert.danger { color: #7f1d1d; background: #fef2f2; border-color: #fecaca; }
