@@ -1,6 +1,6 @@
 <template>
   <div class="layout" :class="{ 'sidebar-open': sidebarOpen }">
-    <aside class="sidebar" role="complementary" aria-label="Navigation latérale">
+    <aside id="portal-sidebar" class="sidebar" role="complementary" aria-label="Navigation latérale">
       <RouterLink to="/portal/dashboard" class="brand" @click="closeSidebar" aria-label="Accueil portail">
         <img class="logo" src="/logo_white.webp" alt="Logo SUPDECO" width="100" height="100" />
       </RouterLink>
@@ -24,7 +24,7 @@
 
     <section class="content" role="main">
       <header class="topbar">
-        <button class="sidebar-toggle" aria-label="Ouvrir le menu" @click="toggleSidebar">
+        <button class="sidebar-toggle" :aria-label="sidebarOpen ? 'Fermer le menu' : 'Ouvrir le menu'" :aria-expanded="sidebarOpen ? 'true' : 'false'" aria-controls="portal-sidebar" @click="toggleSidebar">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
@@ -122,17 +122,43 @@ const initials = computed(() => {
 /* Toggle button */
 .sidebar-toggle { display: none; background: transparent; border: 0; padding: 0.4rem; border-radius: 8px; cursor: pointer; }
 .sidebar-toggle:hover { background: #f3f4f6; }
-.sidebar-toggle .bar { display: block; width: 22px; height: 2px; background: #111827; margin: 4px 0; border-radius: 2px; }
+.sidebar-toggle .bar { display: block; width: 22px; height: 2px; background: #111827; margin: 4px 0; border-radius: 2px; transition: transform 0.2s ease, opacity 0.2s ease; }
+
+/* Burger to close (X) animation when sidebar is open */
+.layout.sidebar-open .sidebar-toggle .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.layout.sidebar-open .sidebar-toggle .bar:nth-child(2) { opacity: 0; }
+.layout.sidebar-open .sidebar-toggle .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
 /* Mobile: off-canvas sidebar and fixed content */
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; padding: 1rem; transform: translateX(-100%); transition: transform 0.2s ease; z-index: 60; }
+  .layout {
+    grid-template-columns: 1fr;
+    /* Allow natural page scrolling on mobile to avoid inner scroll traps */
+    position: static;
+    inset: auto;
+    overflow: visible;
+    min-height: 100dvh;
+  }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 260px; padding: 1rem;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease; z-index: 60;
+  }
   .layout.sidebar-open .sidebar { transform: translateX(0); }
-  .content { height: 100vh; }
+  .content {
+    /* Let content stretch with the page instead of locking to 100vh */
+    height: auto;
+    min-height: 100dvh;
+  }
   .topbar { position: sticky; top: 0; z-index: 50; }
   .sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; }
   .menu { gap: 0.25rem; }
-  .page { padding: 0.75rem; }
+  .page {
+    padding: 0.75rem;
+    /* On mobile, use document scrolling to avoid nested scroll traps */
+    overflow: visible;
+    /* Smooth scrolling in iOS WebKit when inner scrolling is needed */
+    -webkit-overflow-scrolling: touch;
+  }
 }
 </style>

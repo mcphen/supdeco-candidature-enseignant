@@ -5,6 +5,7 @@ import PortalView from '../views/PortalView.vue'
 import PortalDashboard from '../views/PortalDashboard.vue'
 import PortalSoumettre from '../views/PortalSoumettre.vue'
 import { isAuthenticated } from '../services/auth'
+import { trackUserActivity } from '../services/trackingService'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'accueil', component: CandidatureForm },
@@ -43,5 +44,11 @@ router.beforeEach((to, _from, next) => {
     next()
   }
 })
+
+// Suivi de navigation sur chaque changement de route
+router.afterEach(() => {
+  // Enregistrer les informations de navigation
+  trackUserActivity();
+});
 
 export default router
