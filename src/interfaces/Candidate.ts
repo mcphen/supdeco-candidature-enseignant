@@ -7,6 +7,7 @@ export interface Candidate {
   fonction_actuelle: string
   entreprise_universite: string
   dernier_diplome: string
+  diplome_categorie: 'master' | 'doctorat' | 'certificat' | 'licence' | 'autre'
   nb_experience_pedagogie: number
   nb_annee_experience_pro: number
   genre: 'H' | 'F' | 'Autre'

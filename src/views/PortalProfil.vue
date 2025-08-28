@@ -35,6 +35,17 @@
         <div class="grid">
           <div class="row"><label>Fonction actuelle</label><input v-model="form.fonction_actuelle" :disabled="isSubmitted" /></div>
           <div class="row"><label>Entreprise / Université</label><input v-model="form.entreprise_universite" :disabled="isSubmitted" /></div>
+          <div class="row">
+            <label>Catégorie du diplôme</label>
+            <select v-model="form.diplome_categorie" :disabled="isSubmitted">
+              <option value="" disabled>Choisir une catégorie</option>
+              <option value="licence">Licence</option>
+              <option value="master">Master</option>
+              <option value="doctorat">Doctorat</option>
+              <option value="certificat">Certificat</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
           <div class="row"><label>Dernier diplôme</label><input v-model="form.dernier_diplome" :disabled="isSubmitted" /></div>
           <div class="row"><label>Exp. pédagogie (années)</label><input type="number" min="0" v-model.number="form.nb_experience_pedagogie" :disabled="isSubmitted" /></div>
           <div class="row"><label>Exp. professionnelle (années)</label><input type="number" min="0" v-model.number="form.nb_annee_experience_pro" :disabled="isSubmitted" /></div>
@@ -76,8 +87,10 @@ const domaines = [ 'Informatique','Gestion','Marketing','Finance','Droit','Math�
 const form = reactive<Candidate>({
   nom: '', prenom: '', email: '', date_naissance: '', lieu_naissance: '',
   fonction_actuelle: '', entreprise_universite: '', dernier_diplome: '',
+  diplome_categorie: '',
   nb_experience_pedagogie: 0, nb_annee_experience_pro: 0, genre: 'H', nationalite: '',
-  domaines_expertise: [], autres: ''
+  domaines_expertise: [], autres: '',
+  accepts_policies: true,
 })
 
 const saving = ref(false)
@@ -104,6 +117,7 @@ onMounted(async () => {
       date_naissance: data.date_naissance?.substring(0,10) || '',
       lieu_naissance: data.lieu_naissance, fonction_actuelle: data.fonction_actuelle,
       entreprise_universite: data.entreprise_universite, dernier_diplome: data.dernier_diplome,
+      diplome_categorie: data.diplome_categorie || '',
       nb_experience_pedagogie: data.nb_experience_pedagogie, nb_annee_experience_pro: data.nb_annee_experience_pro,
       genre: data.genre, nationalite: data.nationalite, domaines_expertise: data.domaines_expertise || [],
       autres: data.autres || ''

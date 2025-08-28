@@ -56,6 +56,19 @@
           <label for="entreprise_universite" class="required">Entreprise / Université</label>
           <input id="entreprise_universite" v-model="form.entreprise_universite" required placeholder="Ex: Université Cheikh Anta Diop" :aria-invalid="!form.entreprise_universite && tried" />
         </div>
+
+        <div class="row">
+          <label for="diplome_categorie" class="required">Catégorie du diplôme</label>
+          <select id="diplome_categorie" v-model="form.diplome_categorie" required :aria-invalid="!form.diplome_categorie && tried">
+            <option value="" disabled>Choisir une catégorie</option>
+            <option value="licence">Licence</option>
+            <option value="master">Master</option>
+            <option value="doctorat">Doctorat</option>
+            <option value="certificat">Certificat</option>
+            <option value="autre">Autre</option>
+          </select>
+          <small class="hint">Sélectionnez la catégorie correspondant à votre dernier diplôme.</small>
+        </div>
         <div class="row">
           <label for="dernier_diplome" class="required">Dernier diplôme</label>
           <input id="dernier_diplome" v-model="form.dernier_diplome" required placeholder="Ex: Doctorat en Informatique" :aria-invalid="!form.dernier_diplome && tried" />
@@ -148,6 +161,7 @@ const form = reactive<Candidate>({
   autres: '',
   accepts_policies: false,
   newsletter_opt_in: false,
+  diplome_categorie: '',
 })
 
 const loading = ref(false)
