@@ -3,19 +3,7 @@
     <header v-if="showTopbar" class="topbar" role="banner">
       <div class="container">
         <RouterLink to="/" class="brand" aria-label="Accueil SUPDECO">
-          <span class="logo" aria-hidden="true">
-            <!-- Simple inline logo mark using school colors -->
-            <svg viewBox="0 0 48 48" width="32" height="32" focusable="false">
-              <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="var(--color-primary)" />
-                  <stop offset="100%" stop-color="#1f2a7a" />
-                </linearGradient>
-              </defs>
-              <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#g)" />
-              <path d="M12 30c6-2 10-10 16-10 3 0 5 2 8 4" stroke="var(--color-secondary)" stroke-width="3" fill="none" stroke-linecap="round" />
-            </svg>
-          </span>
+          <img class="logo" src="/logo_white.webp" alt="Logo SUPDECO" width="48" height="48" />
           <span class="brand-text">
             <strong>SUPDECO</strong>
             <small>Candidature Enseignant</small>

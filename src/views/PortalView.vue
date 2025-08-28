@@ -2,22 +2,7 @@
   <div class="layout" :class="{ 'sidebar-open': sidebarOpen }">
     <aside class="sidebar" role="complementary" aria-label="Navigation latérale">
       <RouterLink to="/portal/dashboard" class="brand" @click="closeSidebar" aria-label="Accueil portail">
-        <span class="logo" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="28" height="28" focusable="false">
-            <defs>
-              <linearGradient id="g-portal" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="var(--color-primary)" />
-                <stop offset="100%" stop-color="#1f2a7a" />
-              </linearGradient>
-            </defs>
-            <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#g-portal)" />
-            <path d="M12 30c6-2 10-10 16-10 3 0 5 2 8 4" stroke="var(--color-secondary)" stroke-width="3" fill="none" stroke-linecap="round" />
-          </svg>
-        </span>
-        <span class="brand-text">
-          <strong>SUPDECO</strong>
-          <small>Portail Candidat</small>
-        </span>
+        <img class="logo" src="/logo_white.webp" alt="Logo SUPDECO" width="100" height="100" />
       </RouterLink>
 
       <div class="user">
@@ -109,7 +94,7 @@ const initials = computed(() => {
 
 /* Sidebar */
 .sidebar { background: #0f172a; color: #e2e8f0; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.brand { display: inline-flex; align-items: center; gap: 0.6rem; color: #e2e8f0; text-decoration: none; }
+.brand { display: flex; align-items: center; justify-content: center; color: #e2e8f0; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; justify-content: center; background: #ffffff12; border: 1px solid #ffffff22; border-radius: 10px; padding: 2px; }
 .brand-text { display: grid; line-height: 1; }
 .brand-text strong { font-size: 0.98rem; letter-spacing: .2px; }
