@@ -4,7 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import PortalView from '../views/PortalView.vue'
 import PortalDashboard from '../views/PortalDashboard.vue'
 import PortalSoumettre from '../views/PortalSoumettre.vue'
-import { isAuthenticated } from '../services/auth'
+import { useAuthStore } from '../stores/auth'
 import { trackUserActivity } from '../services/trackingService'
 
 const routes: RouteRecordRaw[] = [
@@ -32,13 +32,20 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
+  const auth = useAuthStore()
+  // Ensure session is loaded once
+  if (!auth.isAuthenticated && !auth.token) {
+    auth.loadSession()
+  }
+  const authed = auth.isAuthenticated || !!auth.token
+
   // If user is already authenticated and navigates to home or login, redirect to portal
-  if ((to.name === 'accueil' || to.path === '/' || to.name === 'login' || to.path === '/login') && isAuthenticated()) {
+  if ((to.name === 'accueil' || to.path === '/' || to.name === 'login' || to.path === '/login') && authed) {
     next({ path: '/portal' })
     return
   }
 
-  if (to.matched.some(r => r.meta?.requiresAuth) && !isAuthenticated()) {
+  if (to.matched.some(r => r.meta?.requiresAuth) && !authed) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else {
     next()

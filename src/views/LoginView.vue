@@ -30,11 +30,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
-import { login } from '../services/login.service'
-import { setSession } from '../services/auth'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const auth = useAuthStore()
 
 const email = ref('')
 const password = ref('')
@@ -45,10 +45,13 @@ async function onSubmit() {
   error.value = ''
   loading.value = true
   try {
-    const res = await login(email.value, password.value)
-    setSession(res.token, res.candidat)
-    const redirect = (route.query.redirect as string) || '/portal'
-    router.push(redirect)
+    const ok = await auth.login({ email: email.value, password: password.value })
+    if (ok) {
+      const redirect = (route.query.redirect as string) || '/portal'
+      router.push(redirect)
+    } else {
+      error.value = auth.error || 'Impossible de se connecter.'
+    }
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Impossible de se connecter.'
   } finally {

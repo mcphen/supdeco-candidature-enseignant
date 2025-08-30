@@ -2,6 +2,7 @@ export interface Candidate {
   nom: string
   prenom: string
   email: string
+  telephone: string
   date_naissance: string // ISO date string
   lieu_naissance: string
   fonction_actuelle: string

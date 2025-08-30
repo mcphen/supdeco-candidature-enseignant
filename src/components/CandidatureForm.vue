@@ -20,6 +20,17 @@
           <small class="hint">Nous vous enverrons un email de confirmation.</small>
         </div>
         <div class="row">
+          <label for="telephone" class="required">Téléphone</label>
+          <vue-tel-input
+            id="telephone"
+            v-model="form.telephone"
+            :aria-invalid="!form.telephone && tried"
+            placeholder="Ex: +221 77 123 45 67"
+            name="telephone"
+          />
+          <small class="hint">Incluez l'indicatif du pays. Exemple: +221 pour le Sénégal.</small>
+        </div>
+        <div class="row">
           <label for="date_naissance" class="required">Date de naissance</label>
           <input id="date_naissance" v-model="form.date_naissance" required type="date" :aria-invalid="!form.date_naissance && tried" />
         </div>
@@ -133,6 +144,9 @@ import { reactive, ref, computed } from 'vue'
 import type { Candidate } from '../interfaces/Candidate'
 import { submitCandidate } from '../services/candidate.service'
 import { countries } from '../utils/countries'
+import { createNotification } from '../api/notifications'
+import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const domaines = [
   'Informatique',
@@ -148,6 +162,7 @@ const form = reactive<Candidate>({
   nom: '',
   prenom: '',
   email: '',
+  telephone: '',
   date_naissance: '',
   lieu_naissance: '',
   fonction_actuelle: '',
@@ -168,6 +183,7 @@ const loading = ref(false)
 const message = ref('')
 const error = ref('')
 const tried = ref(false)
+const router = useRouter()
 
 const isValidEmail = computed(() => /.+@.+\..+/.test(form.email))
 
@@ -182,8 +198,47 @@ async function onSubmit() {
       loading.value = false
       return
     }
+    if (!form.telephone) {
+      error.value = 'Le numéro de téléphone est obligatoire.'
+      loading.value = false
+      return
+    }
     const res = await submitCandidate(form)
     message.value = res.message || 'Votre inscription a été enregistrée. Vérifiez votre email.'
+    // Enregistrer une notification côté backend pour le candidat
+    try {
+      if (res?.id) {
+        await createNotification(res.id, {
+          title: 'Inscription réussie',
+          message: 'Votre inscription a été enregistrée avec succès. Vous pouvez compléter votre dossier.',
+          type: 'success'
+        })
+        // aussi conserver une trace locale immédiate
+        const local = [{ id: 'welcome', title: 'Inscription réussie', type: 'success', date: new Date().toLocaleString() }]
+        localStorage.setItem('enseignant_notifications', JSON.stringify(local))
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('enseignant_candidat_id', String(res.id))
+        }
+      }
+    } catch (_) {
+      // Ne pas bloquer l'UX si la notification échoue.
+    }
+
+    // Afficher une alerte de confirmation et rediriger vers la page de connexion
+    try {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Candidature enregistrée avec succès',
+        text: 'Un mot de passe vous a été envoyé par email.',
+        confirmButtonText: 'OK',
+        allowOutsideClick: false,
+        allowEscapeKey: true
+      })
+      router.push({ name: 'login' })
+      return
+    } catch (_) {
+      // Si l'alerte échoue, continuer sans bloquer
+    }
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.'
   } finally {

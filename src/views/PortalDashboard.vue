@@ -40,7 +40,7 @@
         <li :class="{ done: steps.dossierSoumis }">
           <span class="dot" aria-hidden="true"></span>
           <div>
-            <div class="step-title">Dossier soumis</div>
+            <div class="step-title">  Dossier soumis</div>
             <small class="muted">Vous recevrez une notification après l'examen.</small>
           </div>
         </li>
@@ -89,6 +89,7 @@ import { RouterLink } from 'vue-router'
 import { getUser, getToken } from '../services/auth'
 import { getCandidatureDocumentsStatus } from '../api/document'
 import { getCandidatureStatus } from '../api/candidate'
+import { getNotifications, type RawNotification } from '../api/notifications'
 
 type DashboardNotification = { id: string; title: string; type: 'info'|'success'|'warning'; date: string }
 
@@ -112,27 +113,54 @@ const steps = reactive({
     const u = user.value
     return !!(u && u.prenom && u.nom && u.email && (u.domaines_expertise?.length || 0) > 0)
   }),
+
   docsTeleverses: computed(() => docsStarted.value || localStorage.getItem('enseignant_docs_ok') === '1'),
   dossierSoumis: computed(() => (status.value?.is_submitted === true) || localStorage.getItem('enseignant_dossier_submis') === '1'),
   entretienPlanifie: computed(() => (status.value?.has_interview === true) || localStorage.getItem('enseignant_entretien') === '1'),
   decisionRendue: computed(() => (!!status.value?.decision_status) || localStorage.getItem('enseignant_decision') === '1'),
 }) as any
-
+console.log('status',localStorage.getItem('enseignant_dossier_submis'))
 const progress = computed(() => {
   const vals = [steps.compteCree, steps.profilComplet, steps.docsTeleverses, steps.dossierSoumis, steps.entretienPlanifie, steps.decisionRendue]
   const done = vals.filter(Boolean).length
   return (done / vals.length) * 100
 })
 
-// Notifications (stockées localement pour la démonstration)
+// Notifications (dynamiques via API avec repli local)
 const notifications = ref<DashboardNotification[]>([])
 
-function loadNotifications() {
+async function loadNotifications() {
+  const userIdRaw = localStorage.getItem('enseignant_candidat_id')
+  const id = userIdRaw ? parseInt(userIdRaw, 10) : (user.value as any)?.id
+  if (id) {
+    try {
+      const items = await getNotifications(id)
+      const mapped = (items || []).map((n: RawNotification) => ({
+        id: String(n.id ?? Math.random().toString(36).slice(2)),
+        title: n.title || n.message || n.contenu || 'Notification',
+        type: (['info','success','warning'].includes(String(n.type)) ? (n.type as any) : 'info'),
+        date: new Date(n.created_at || n.date || Date.now()).toLocaleString(),
+      }))
+      if (mapped.length === 0) {
+        // S'il n'y a rien côté backend, conserver un message d'accueil la première fois
+        const welcome: DashboardNotification = { id: 'hello', title: 'Bienvenue sur le portail candidat !', type: 'info', date: new Date().toLocaleString() }
+        notifications.value = [welcome]
+      } else {
+        notifications.value = mapped
+      }
+      // Mémoriser localement pour un affichage hors ligne éventuel
+      localStorage.setItem('enseignant_notifications', JSON.stringify(notifications.value))
+      return
+    } catch (e) {
+      // Tomber en repli local si l’API échoue
+    }
+  }
+  // Repli local (aucun id ou échec API)
   const raw = localStorage.getItem('enseignant_notifications')
   if (raw) {
     try { notifications.value = JSON.parse(raw) } catch { notifications.value = [] }
-  } else {
-    // Préremplir avec une notification d'accueil
+  }
+  if (!notifications.value.length) {
     notifications.value = [{ id: 'hello', title: 'Bienvenue sur le portail candidat !', type: 'info', date: new Date().toLocaleString() }]
     localStorage.setItem('enseignant_notifications', JSON.stringify(notifications.value))
   }

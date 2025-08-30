@@ -33,15 +33,16 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
 import { ref, computed, watch } from 'vue'
-import { isAuthenticated } from './services/auth'
+import { useAuthStore } from './stores/auth'
 const mobileOpen = ref(false)
 const route = useRoute()
+const auth = useAuthStore()
 
 // Hide topbar if user is authenticated or when navigating inside protected portal
 const showTopbar = computed(() => {
   // Hide when authenticated or when route requires auth (ex: /portal)
   const requiresAuth = route.matched.some(r => r.meta && (r.meta as any).requiresAuth)
-  return !isAuthenticated() && !requiresAuth
+  return !auth.isAuthenticated && !requiresAuth
 })
 
 // Close mobile menu on route change

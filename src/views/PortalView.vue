@@ -44,17 +44,14 @@
 
 <script setup lang="ts">
 import { useRouter, useRoute, RouterLink } from 'vue-router'
-import { clearSession, getUser } from '../services/auth'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const route = useRoute()
-const user = ref(getUser())
+const auth = useAuthStore()
+const user = computed(() => auth.user)
 const sidebarOpen = ref(false)
-
-onMounted(() => {
-  user.value = getUser()
-})
 
 watch(() => route.fullPath, () => { sidebarOpen.value = false })
 
@@ -64,7 +61,8 @@ function toggleSidebar() {
 function closeSidebar() { sidebarOpen.value = false }
 
 function logout() {
-  clearSession()
+  try { localStorage.clear() } catch (e) { /* ignore storage errors */ }
+  auth.logout()
   router.push('/login')
 }
 

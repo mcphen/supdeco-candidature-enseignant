@@ -10,6 +10,16 @@
           <div class="row"><label>Nom</label><input v-model="form.nom" :disabled="isSubmitted" /></div>
           <div class="row"><label>Prénom</label><input v-model="form.prenom" :disabled="isSubmitted" /></div>
           <div class="row"><label>Email</label><input type="email" v-model="form.email" :disabled="isSubmitted" /></div>
+          <div class="row">
+            <label for="telephone">Téléphone</label>
+            <vue-tel-input
+              id="telephone"
+              v-model="form.telephone"
+              placeholder="Ex: +221 77 123 45 67"
+              name="telephone"
+              :disabled="isSubmitted"
+            />
+          </div>
           <div class="row"><label>Date de naissance</label><input type="date" v-model="form.date_naissance" :disabled="isSubmitted" /></div>
           <div class="row"><label>Lieu de naissance</label><input v-model="form.lieu_naissance" :disabled="isSubmitted" /></div>
           <div class="row">
@@ -85,7 +95,7 @@ import { countries } from '../utils/countries'
 const domaines = [ 'Informatique','Gestion','Marketing','Finance','Droit','Mathématiques','Communication' ]
 
 const form = reactive<Candidate>({
-  nom: '', prenom: '', email: '', date_naissance: '', lieu_naissance: '',
+  nom: '', prenom: '', email: '', telephone: '', date_naissance: '', lieu_naissance: '',
   fonction_actuelle: '', entreprise_universite: '', dernier_diplome: '',
   diplome_categorie: '',
   nb_experience_pedagogie: 0, nb_annee_experience_pro: 0, genre: 'H', nationalite: '',
@@ -113,7 +123,7 @@ onMounted(async () => {
     const data = await getCandidature(candidatureId.value)
     remote.value = data
     Object.assign(form, {
-      nom: data.nom, prenom: data.prenom, email: data.email,
+      nom: data.nom, prenom: data.prenom, email: data.email, telephone: data.telephone || '',
       date_naissance: data.date_naissance?.substring(0,10) || '',
       lieu_naissance: data.lieu_naissance, fonction_actuelle: data.fonction_actuelle,
       entreprise_universite: data.entreprise_universite, dernier_diplome: data.dernier_diplome,
